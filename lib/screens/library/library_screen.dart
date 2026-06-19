@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 
-import '../../data/dummy_library_data.dart';
+import '../../data/library_catalog.dart';
 import '../../models/library_story.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
 import '../../widgets/library_story_card.dart';
+import 'add_story_sheet.dart';
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
+  @override
+  State<LibraryScreen> createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends State<LibraryScreen> {
   static const _tabs = [
     (emoji: '📚', label: 'Books'),
     (emoji: '🎬', label: 'Movies'),
     (emoji: '📺', label: 'Series'),
   ];
+
+  late final LibraryCatalog _catalog = LibraryCatalog.fromDummyData();
+
+  void _openAddStorySheet() {
+    AddStorySheet.show(
+      context,
+      onSave: (story) {
+        setState(() => _catalog.addStory(story));
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +38,7 @@ class LibraryScreen extends StatelessWidget {
       length: _tabs.length,
       child: Scaffold(
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {},
+          onPressed: _openAddStorySheet,
           backgroundColor: AppColors.lavenderDark,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
@@ -40,9 +57,9 @@ class LibraryScreen extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _LibraryStoryList(stories: DummyLibraryData.books),
-                        _LibraryStoryList(stories: DummyLibraryData.movies),
-                        _LibraryStoryList(stories: DummyLibraryData.series),
+                        _LibraryStoryList(stories: _catalog.books),
+                        _LibraryStoryList(stories: _catalog.movies),
+                        _LibraryStoryList(stories: _catalog.series),
                       ],
                     ),
                   ),
