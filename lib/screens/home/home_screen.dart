@@ -13,6 +13,7 @@ import '../../widgets/recommendation_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/story_mood_card.dart';
+import '../story/story_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -98,6 +99,15 @@ class HomeScreen extends StatelessWidget {
                             recommendations:
                                 RecommendationData.forMood(mood.id),
                             moodId: mood.id,
+                            onRecommendationTap: (recommendation) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (context) => StoryDetailScreen(
+                                    recommendation: recommendation,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 28),
                           const SectionHeader(title: 'Monthly Progress'),
@@ -200,10 +210,12 @@ class _RecommendationsRow extends StatelessWidget {
   const _RecommendationsRow({
     required this.recommendations,
     required this.moodId,
+    required this.onRecommendationTap,
   });
 
   final List<Recommendation> recommendations;
   final String moodId;
+  final ValueChanged<Recommendation> onRecommendationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +229,7 @@ class _RecommendationsRow extends StatelessWidget {
           return RecommendationCard(
             recommendation: recommendations[index],
             moodId: moodId,
+            onTap: () => onRecommendationTap(recommendations[index]),
           );
         },
       ),

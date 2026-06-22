@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'data/favorites_storage.dart';
 import 'data/library_storage.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'theme/app_theme.dart';
@@ -7,6 +8,7 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LibraryStorage.init();
+  await FavoritesStorage.instance.init();
   runApp(const CozyVerseApp());
 }
 

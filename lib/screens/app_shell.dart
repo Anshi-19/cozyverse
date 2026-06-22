@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'library/library_screen.dart';
 import 'mood/mood_screen.dart';
+import 'saved/saved_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -31,6 +32,11 @@ class _AppShellState extends State<AppShell> {
       label: 'Library',
     ),
     NavigationDestination(
+      icon: Icon(Icons.favorite_outline_rounded),
+      selectedIcon: Icon(Icons.favorite_rounded),
+      label: 'Saved',
+    ),
+    NavigationDestination(
       icon: Icon(Icons.person_outline_rounded),
       selectedIcon: Icon(Icons.person_rounded),
       label: 'Profile',
@@ -41,6 +47,7 @@ class _AppShellState extends State<AppShell> {
     HomeScreen(),
     MoodScreen(),
     LibraryScreen(),
+    SavedScreen(),
     _PlaceholderTab(label: 'Profile'),
   ];
 

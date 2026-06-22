@@ -12,11 +12,13 @@ class RecommendationCard extends StatelessWidget {
     required this.recommendation,
     required this.moodId,
     this.width = 176,
+    this.onTap,
   });
 
   final Recommendation recommendation;
   final String moodId;
   final double width;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -24,96 +26,105 @@ class RecommendationCard extends StatelessWidget {
     final gradientColors =
         RecommendationData.gradientForCategory(recommendation.category);
 
-    return Container(
+    return SizedBox(
       width: width,
-      decoration: BoxDecoration(
-        color: AppColors.creamSurface,
+      child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.lavenderLight.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.lavenderLight.withValues(alpha: 0.16),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 96,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(22),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: gradientColors,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.35),
-                    ),
-                    child: Icon(
-                      recommendation.icon,
-                      size: 30,
-                      color: AppColors.lavenderDark,
-                    ),
-                  ),
-                ),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.creamSurface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: AppColors.lavenderLight.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.lavenderLight.withValues(alpha: 0.16),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
-              Positioned(
-                top: 10,
-                left: 10,
-                child: CategoryBadge(label: recommendation.category),
-              ),
-              if (mood != null)
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: _MoodBadge(label: mood.displayLabel),
-                ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  recommendation.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    height: 96,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(22),
                       ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  recommendation.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        height: 1.35,
-                        color: AppColors.textSecondary,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: gradientColors,
                       ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.35),
+                        ),
+                        child: Icon(
+                          recommendation.icon,
+                          size: 30,
+                          color: AppColors.lavenderDark,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: CategoryBadge(label: recommendation.category),
+                  ),
+                  if (mood != null)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: _MoodBadge(label: mood.displayLabel),
+                    ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recommendation.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      recommendation.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            height: 1.35,
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
       ),
     );
   }

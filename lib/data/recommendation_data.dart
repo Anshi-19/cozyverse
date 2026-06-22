@@ -208,4 +208,30 @@ abstract final class RecommendationData {
       _ => [const Color(0xFFF5EEFB), const Color(0xFFE8DFF5)],
     };
   }
+
+  static String moodMatchBlurbFor(String moodId) {
+    return switch (moodId) {
+      'cozy' =>
+        'This story is perfect for warm evenings, comfort, and escapism.',
+      'magical' =>
+        'Ideal when you want wonder, enchantment, and a touch of magic.',
+      'sci-fi' => 'Perfect for exploring bold futures and expansive worlds.',
+      'melancholy' =>
+        'A thoughtful pick for quiet reflection and deep feeling.',
+      'romantic' => 'Made for heartfelt moments and stories of love.',
+      'adventure' => 'Great for epic quests and journeys into the unknown.',
+      'relaxed' => 'A gentle choice for calm days and peaceful viewing.',
+      'intense' => 'Best when you want gripping drama and high stakes.',
+      _ => 'A wonderful match for your current story mood.',
+    };
+  }
+
+  static String estimatedTimeFor(Recommendation recommendation) {
+    return switch (recommendation.category) {
+      'Book' => '6–8 hours',
+      'Movie' => '2–3 hours',
+      'Series' => 'Season 1 · 8 hours',
+      _ => '2–4 hours',
+    };
+  }
 }
