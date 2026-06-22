@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'home/home_screen.dart';
 import 'library/library_screen.dart';
+import 'mood/mood_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -20,14 +21,14 @@ class _AppShellState extends State<AppShell> {
       label: 'Home',
     ),
     NavigationDestination(
-      icon: Icon(Icons.explore_outlined),
-      selectedIcon: Icon(Icons.explore_rounded),
-      label: 'Explore',
+      icon: Icon(Icons.auto_awesome_outlined),
+      selectedIcon: Icon(Icons.auto_awesome_rounded),
+      label: 'Mood',
     ),
     NavigationDestination(
-      icon: Icon(Icons.favorite_outline_rounded),
-      selectedIcon: Icon(Icons.favorite_rounded),
-      label: 'Saved',
+      icon: Icon(Icons.collections_bookmark_outlined),
+      selectedIcon: Icon(Icons.collections_bookmark_rounded),
+      label: 'Library',
     ),
     NavigationDestination(
       icon: Icon(Icons.person_outline_rounded),
@@ -37,11 +38,11 @@ class _AppShellState extends State<AppShell> {
   ];
 
   static const _tabs = [
-  HomeScreen(),
-  LibraryScreen(),
-  _PlaceholderTab(label: 'Saved'),
-  _PlaceholderTab(label: 'Profile'),
-];
+    HomeScreen(),
+    MoodScreen(),
+    LibraryScreen(),
+    _PlaceholderTab(label: 'Profile'),
+  ];
 
   @override
   Widget build(BuildContext context) {

@@ -8,82 +8,95 @@ class LibraryStoryCard extends StatelessWidget {
   const LibraryStoryCard({
     super.key,
     required this.story,
+    this.onTap,
+    this.onLongPress,
   });
 
   final LibraryStory story;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final progressPercent = (story.progress * 100).round();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.creamSurface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.lavenderLight.withValues(alpha: 0.45),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.lavender.withValues(alpha: 0.1),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.creamSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.lavenderLight.withValues(alpha: 0.45),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.lavender.withValues(alpha: 0.1),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          _CoverPlaceholder(
-            icon: story.icon,
-            gradientColors: story.gradientColors,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  story.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        height: 1.25,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                StatusBadge(status: story.status),
-                const SizedBox(height: 10),
-                Row(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              _CoverPlaceholder(
+                icon: story.icon,
+                gradientColors: story.gradientColors,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _RatingDisplay(rating: story.rating),
-                    const Spacer(),
                     Text(
-                      '$progressPercent%',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lavenderDark,
+                      story.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                            height: 1.25,
                           ),
+                    ),
+                    const SizedBox(height: 8),
+                    StatusBadge(status: story.status),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _RatingDisplay(rating: story.rating),
+                        const Spacer(),
+                        Text(
+                          '$progressPercent%',
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lavenderDark,
+                                  ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: story.progress,
+                        minHeight: 6,
+                        backgroundColor:
+                            AppColors.lavenderLight.withValues(alpha: 0.35),
+                        color: AppColors.lavenderDark,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: story.progress,
-                    minHeight: 6,
-                    backgroundColor:
-                        AppColors.lavenderLight.withValues(alpha: 0.35),
-                    color: AppColors.lavenderDark,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

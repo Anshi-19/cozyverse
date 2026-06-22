@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'data/library_storage.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LibraryStorage.init();
   runApp(const CozyVerseApp());
 }
 

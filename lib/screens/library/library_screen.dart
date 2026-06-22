@@ -4,8 +4,10 @@ import '../../data/library_catalog.dart';
 import '../../models/library_story.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
+import '../../widgets/delete_story_dialog.dart';
 import '../../widgets/library_story_card.dart';
 import 'add_story_sheet.dart';
+import 'story_actions_sheet.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -21,15 +23,60 @@ class _LibraryScreenState extends State<LibraryScreen> {
     (emoji: '📺', label: 'Series'),
   ];
 
-  late final LibraryCatalog _catalog = LibraryCatalog.fromDummyData();
+  late final LibraryCatalog _catalog = LibraryCatalog.create();
 
   void _openAddStorySheet() {
     AddStorySheet.show(
       context,
-      onSave: (story) {
-        setState(() => _catalog.addStory(story));
+      onSave: (story) async {
+        await _catalog.addStory(story);
+        if (mounted) {
+          setState(() {});
+        }
       },
     );
+  }
+
+  void _openEditStorySheet(LibraryStory story) {
+    if (!_catalog.isUserStory(story)) {
+      return;
+    }
+
+    AddStorySheet.show(
+      context,
+      storyToEdit: story,
+      onSave: (updatedStory) async {
+        await _catalog.updateStory(updatedStory);
+        if (mounted) {
+          setState(() {});
+        }
+      },
+    );
+  }
+
+  void _openStoryActionsSheet(LibraryStory story) {
+    if (!_catalog.isUserStory(story)) {
+      return;
+    }
+
+    StoryActionsSheet.show(
+      context,
+      story: story,
+      onEdit: () => _openEditStorySheet(story),
+      onDelete: () => _confirmDeleteStory(story),
+    );
+  }
+
+  Future<void> _confirmDeleteStory(LibraryStory story) async {
+    final confirmed = await DeleteStoryDialog.show(context);
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    await _catalog.deleteStory(story);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -57,9 +104,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _LibraryStoryList(stories: _catalog.books),
-                        _LibraryStoryList(stories: _catalog.movies),
-                        _LibraryStoryList(stories: _catalog.series),
+                        _LibraryStoryList(
+                          stories: _catalog.books,
+                          isUserStory: _catalog.isUserStory,
+                          onStoryTap: _openEditStorySheet,
+                          onStoryLongPress: _openStoryActionsSheet,
+                        ),
+                        _LibraryStoryList(
+                          stories: _catalog.movies,
+                          isUserStory: _catalog.isUserStory,
+                          onStoryTap: _openEditStorySheet,
+                          onStoryLongPress: _openStoryActionsSheet,
+                        ),
+                        _LibraryStoryList(
+                          stories: _catalog.series,
+                          isUserStory: _catalog.isUserStory,
+                          onStoryTap: _openEditStorySheet,
+                          onStoryLongPress: _openStoryActionsSheet,
+                        ),
                       ],
                     ),
                   ),
@@ -174,9 +236,17 @@ class _LibraryTabBar extends StatelessWidget {
 }
 
 class _LibraryStoryList extends StatelessWidget {
-  const _LibraryStoryList({required this.stories});
+  const _LibraryStoryList({
+    required this.stories,
+    required this.isUserStory,
+    required this.onStoryTap,
+    required this.onStoryLongPress,
+  });
 
   final List<LibraryStory> stories;
+  final bool Function(LibraryStory story) isUserStory;
+  final ValueChanged<LibraryStory> onStoryTap;
+  final ValueChanged<LibraryStory> onStoryLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +265,15 @@ class _LibraryStoryList extends StatelessWidget {
               itemCount: stories.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                return LibraryStoryCard(story: stories[index]);
+                final story = stories[index];
+                final isUserCreated = isUserStory(story);
+
+                return LibraryStoryCard(
+                  story: story,
+                  onTap: isUserCreated ? () => onStoryTap(story) : null,
+                  onLongPress:
+                      isUserCreated ? () => onStoryLongPress(story) : null,
+                );
               },
             ),
           ),

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../models/story_item.dart';
+import '../../data/mood_data.dart';
+import '../../data/mood_storage.dart';
+import '../../data/recommendation_data.dart';
+import '../../models/recommendation.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
 import '../../widgets/home_header_illustration.dart';
 import '../../widgets/monthly_progress_card.dart';
 import '../../widgets/mood_card.dart';
+import '../../widgets/recommendation_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stat_card.dart';
-import '../../widgets/story_card.dart';
 import '../../widgets/story_mood_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -41,27 +44,6 @@ class HomeScreen extends StatelessWidget {
     ),
   ];
 
-  static const _exploreStories = [
-    StoryItem(
-      title: 'Harry Potter',
-      category: 'Book',
-      icon: Icons.auto_stories_rounded,
-      gradientColors: [Color(0xFFE8DFF5), Color(0xFFD4C5E8)],
-    ),
-    StoryItem(
-      title: 'Interstellar',
-      category: 'Movie',
-      icon: Icons.rocket_launch_rounded,
-      gradientColors: [Color(0xFFFFF0E5), Color(0xFFE8DFF5)],
-    ),
-    StoryItem(
-      title: 'Stranger Things',
-      category: 'Series',
-      icon: Icons.bolt_rounded,
-      gradientColors: [Color(0xFFDDD0F0), Color(0xFFC5B4E3)],
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -72,46 +54,65 @@ class HomeScreen extends StatelessWidget {
           const _HomeBackground(),
           const DecorativeStars(),
           SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      const HomeHeaderIllustration(),
-                      const SizedBox(height: 20),
-                      const _GreetingHeader(),
-                      const SizedBox(height: 24),
-                      const MoodCard(
-                        moodLabel: 'Cozy ☕',
-                        icon: Icons.nights_stay_rounded,
+            child: ListenableBuilder(
+              listenable: MoodStorage.instance,
+              builder: (context, _) {
+                final mood = MoodStorage.instance.selectedMood;
+
+                return CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          const HomeHeaderIllustration(),
+                          const SizedBox(height: 20),
+                          const _GreetingHeader(),
+                          const SizedBox(height: 24),
+                          MoodCard(
+                            moodLabel: mood.displayLabel,
+                            icon: MoodData.iconFor(mood),
+                          ),
+                          const SizedBox(height: 20),
+                          StoryMoodCard(
+                            moodTitle: mood.displayLabel,
+                            description: mood.description,
+                          ),
+                          const SizedBox(height: 28),
+                          const SectionHeader(title: 'Your Collection'),
+                          const SizedBox(height: 14),
+                          const _StatsRow(stats: _stats),
+                          const SizedBox(height: 28),
+                          const SectionHeader(title: 'Recommended For Tonight'),
+                          const SizedBox(height: 8),
+                          Text(
+                            RecommendationData.headingFor(mood.id),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                ),
+                          ),
+                          const SizedBox(height: 14),
+                          _RecommendationsRow(
+                            recommendations:
+                                RecommendationData.forMood(mood.id),
+                            moodId: mood.id,
+                          ),
+                          const SizedBox(height: 28),
+                          const SectionHeader(title: 'Monthly Progress'),
+                          const SizedBox(height: 14),
+                          const MonthlyProgressCard(
+                            completedCount: 8,
+                            progress: 0.67,
+                          ),
+                          SizedBox(height: 24 + bottomPadding),
+                        ]),
                       ),
-                      const SizedBox(height: 20),
-                      const StoryMoodCard(
-                        moodTitle: '☕ Cozy Evening',
-                        description:
-                            'Perfect night for fantasy and comfort stories.',
-                      ),
-                      const SizedBox(height: 28),
-                      const SectionHeader(title: 'Your Collection'),
-                      const SizedBox(height: 14),
-                      const _StatsRow(stats: _stats),
-                      const SizedBox(height: 28),
-                      const SectionHeader(title: 'Continue Exploring'),
-                      const SizedBox(height: 14),
-                      const _ExploreStoriesRow(stories: _exploreStories),
-                      const SizedBox(height: 28),
-                      const SectionHeader(title: 'Monthly Progress'),
-                      const SizedBox(height: 14),
-                      const MonthlyProgressCard(
-                        completedCount: 8,
-                        progress: 0.67,
-                      ),
-                      SizedBox(height: 24 + bottomPadding),
-                    ]),
-                  ),
-                ),
-              ],
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -195,26 +196,27 @@ class _StatsRow extends StatelessWidget {
   }
 }
 
-class _ExploreStoriesRow extends StatelessWidget {
-  const _ExploreStoriesRow({required this.stories});
+class _RecommendationsRow extends StatelessWidget {
+  const _RecommendationsRow({
+    required this.recommendations,
+    required this.moodId,
+  });
 
-  final List<StoryItem> stories;
+  final List<Recommendation> recommendations;
+  final String moodId;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 178,
+      height: 214,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: stories.length,
+        itemCount: recommendations.length,
         separatorBuilder: (context, index) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
-          final story = stories[index];
-          return StoryCard(
-            title: story.title,
-            category: story.category,
-            icon: story.icon,
-            gradientColors: story.gradientColors,
+          return RecommendationCard(
+            recommendation: recommendations[index],
+            moodId: moodId,
           );
         },
       ),

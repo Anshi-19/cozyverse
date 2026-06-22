@@ -9,13 +9,16 @@ class AddStorySheet extends StatefulWidget {
   const AddStorySheet({
     super.key,
     required this.onSave,
+    this.storyToEdit,
   });
 
   final ValueChanged<LibraryStory> onSave;
+  final LibraryStory? storyToEdit;
 
   static Future<void> show(
     BuildContext context, {
     required ValueChanged<LibraryStory> onSave,
+    LibraryStory? storyToEdit,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -24,7 +27,10 @@ class AddStorySheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => AddStorySheet(onSave: onSave),
+      builder: (context) => AddStorySheet(
+        onSave: onSave,
+        storyToEdit: storyToEdit,
+      ),
     );
   }
 
@@ -36,10 +42,30 @@ class _AddStorySheetState extends State<AddStorySheet> {
   final _titleController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  LibraryStoryType _type = LibraryStoryType.book;
-  late String _status = LibraryStoryStatuses.forType(_type).first;
-  double _rating = 3;
-  double _progress = 0;
+  late LibraryStoryType _type;
+  late String _status;
+  late double _rating;
+  late double _progress;
+
+  bool get _isEditing => widget.storyToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final story = widget.storyToEdit;
+    if (story != null) {
+      _titleController.text = story.title;
+      _type = story.type;
+      _status = story.status;
+      _rating = story.rating > 0 ? story.rating : 1;
+      _progress = story.progress * 100;
+    } else {
+      _type = LibraryStoryType.book;
+      _status = LibraryStoryStatuses.forType(_type).first;
+      _rating = 3;
+      _progress = 0;
+    }
+  }
 
   @override
   void dispose() {
@@ -52,24 +78,31 @@ class _AddStorySheetState extends State<AddStorySheet> {
   void _onTypeChanged(LibraryStoryType type) {
     setState(() {
       _type = type;
-      _status = _statusOptions.first;
+      if (!_statusOptions.contains(_status)) {
+        _status = _statusOptions.first;
+      }
     });
   }
 
-  void _save() {
+  void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
     final defaults = LibraryStoryDefaults.forType(_type);
+    final original = widget.storyToEdit;
+    final typeChanged = original != null && original.type != _type;
+
     final story = LibraryStory(
-      id: LibraryCatalog.nextId(_type),
+      id: original?.id ?? LibraryCatalog.nextId(_type),
       title: _titleController.text.trim(),
       status: _status,
       rating: _rating,
       progress: _progress / 100,
-      icon: defaults.icon,
-      gradientColors: defaults.gradientColors,
+      icon: typeChanged ? defaults.icon : (original?.icon ?? defaults.icon),
+      gradientColors: typeChanged
+          ? defaults.gradientColors
+          : (original?.gradientColors ?? defaults.gradientColors),
       type: _type,
     );
 
@@ -102,7 +135,7 @@ class _AddStorySheetState extends State<AddStorySheet> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Add Story',
+                _isEditing ? 'Edit Story' : 'Add Story',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -110,7 +143,9 @@ class _AddStorySheetState extends State<AddStorySheet> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Add a new book, movie, or series to your library.',
+                _isEditing
+                    ? 'Update the details for this story.'
+                    : 'Add a new book, movie, or series to your library.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -240,7 +275,7 @@ class _AddStorySheetState extends State<AddStorySheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _save,
+                      onPressed: _submit,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.lavenderDark,
                         foregroundColor: Colors.white,
@@ -249,7 +284,7 @@ class _AddStorySheetState extends State<AddStorySheet> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text('Save'),
+                      child: Text(_isEditing ? 'Update' : 'Save'),
                     ),
                   ),
                 ],
