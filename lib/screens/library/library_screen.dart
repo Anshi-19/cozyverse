@@ -5,6 +5,9 @@ import '../../models/library_story.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
 import '../../widgets/delete_story_dialog.dart';
+
+import '../../widgets/library_search_empty_state.dart';
+import '../../widgets/library_search_field.dart';
 import '../../widgets/library_story_card.dart';
 import 'add_story_sheet.dart';
 import 'story_actions_sheet.dart';
@@ -24,6 +27,32 @@ class _LibraryScreenState extends State<LibraryScreen> {
   ];
 
   late final LibraryCatalog _catalog = LibraryCatalog.create();
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<LibraryStory> _filterStories(List<LibraryStory> stories) {
+    final query = _searchQuery.trim();
+    if (query.isEmpty) {
+      return stories;
+    }
+
+    final normalizedQuery = query.toLowerCase();
+    return stories
+        .where(
+          (story) => story.title.toLowerCase().contains(normalizedQuery),
+        )
+        .toList();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _searchQuery = value);
+  }
 
   void _openAddStorySheet() {
     AddStorySheet.show(
@@ -99,25 +128,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  
                   const _LibraryHeader(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                    child: LibrarySearchField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                    ),
+                  ),
                   _LibraryTabBar(tabs: _tabs),
                   Expanded(
                     child: TabBarView(
                       children: [
                         _LibraryStoryList(
-                          stories: _catalog.books,
+                          stories: _filterStories(_catalog.books),
+                          isSearching: _searchQuery.trim().isNotEmpty,
                           isUserStory: _catalog.isUserStory,
                           onStoryTap: _openEditStorySheet,
                           onStoryLongPress: _openStoryActionsSheet,
                         ),
                         _LibraryStoryList(
-                          stories: _catalog.movies,
+                          stories: _filterStories(_catalog.movies),
+                          isSearching: _searchQuery.trim().isNotEmpty,
                           isUserStory: _catalog.isUserStory,
                           onStoryTap: _openEditStorySheet,
                           onStoryLongPress: _openStoryActionsSheet,
                         ),
                         _LibraryStoryList(
-                          stories: _catalog.series,
+                          stories: _filterStories(_catalog.series),
+                          isSearching: _searchQuery.trim().isNotEmpty,
                           isUserStory: _catalog.isUserStory,
                           onStoryTap: _openEditStorySheet,
                           onStoryLongPress: _openStoryActionsSheet,
@@ -238,18 +278,24 @@ class _LibraryTabBar extends StatelessWidget {
 class _LibraryStoryList extends StatelessWidget {
   const _LibraryStoryList({
     required this.stories,
+    required this.isSearching,
     required this.isUserStory,
     required this.onStoryTap,
     required this.onStoryLongPress,
   });
 
   final List<LibraryStory> stories;
+  final bool isSearching;
   final bool Function(LibraryStory story) isUserStory;
   final ValueChanged<LibraryStory> onStoryTap;
   final ValueChanged<LibraryStory> onStoryLongPress;
 
   @override
   Widget build(BuildContext context) {
+    if (isSearching && stories.isEmpty) {
+      return const LibrarySearchEmptyState();
+    }
+
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return LayoutBuilder(

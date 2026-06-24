@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../navigation/cozy_page_route.dart';
 import '../../data/mood_data.dart';
 import '../../data/mood_storage.dart';
 import '../../data/recommendation_data.dart';
 import '../../models/recommendation.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
-import '../../widgets/home_header_illustration.dart';
+import '../../widgets/illustrations/hero_illustration.dart';
 import '../../widgets/monthly_progress_card.dart';
 import '../../widgets/mood_card.dart';
 import '../../widgets/recommendation_card.dart';
@@ -66,9 +67,9 @@ class HomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
-                          const HomeHeaderIllustration(),
-                          const SizedBox(height: 20),
                           const _GreetingHeader(),
+                          const SizedBox(height: 20),
+                          const HeroIllustration(),
                           const SizedBox(height: 24),
                           MoodCard(
                             moodLabel: mood.displayLabel,
@@ -101,8 +102,8 @@ class HomeScreen extends StatelessWidget {
                             moodId: mood.id,
                             onRecommendationTap: (recommendation) {
                               Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (context) => StoryDetailScreen(
+                                cozyPageRoute<void>(
+                                  StoryDetailScreen(
                                     recommendation: recommendation,
                                   ),
                                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../navigation/cozy_page_route.dart';
 import '../../theme/app_theme.dart';
 import '../app_shell.dart';
 
@@ -44,20 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _finishOnboarding() {
     Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const AppShell(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            ),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 450),
-      ),
+      cozyPageRoute<void>(const AppShell()),
     );
   }
 

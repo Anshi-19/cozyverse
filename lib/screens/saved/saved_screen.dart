@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../navigation/cozy_page_route.dart';
 import '../../data/favorites_storage.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
@@ -41,8 +42,8 @@ class SavedScreen extends StatelessWidget {
                                 favorite: favorite,
                                 onTap: () {
                                   Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (context) => StoryDetailScreen(
+                                    cozyPageRoute<void>(
+                                      StoryDetailScreen(
                                         recommendation: favorite.recommendation,
                                       ),
                                     ),

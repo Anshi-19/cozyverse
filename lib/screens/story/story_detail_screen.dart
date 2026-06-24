@@ -6,6 +6,7 @@ import '../../data/recommendation_data.dart';
 import '../../models/recommendation.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
+import '../../widgets/favorite_action_button.dart';
 import '../../widgets/story_detail_hero.dart';
 import '../../widgets/story_details_card.dart';
 
@@ -122,12 +123,8 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: _StoryActionButton(
-                                  label: _isFavorite
-                                      ? 'Favorited'
-                                      : 'Add to Favorites',
-                                  emoji: '❤️',
-                                  isActive: _isFavorite,
+                                child: FavoriteActionButton(
+                                  isFavorite: _isFavorite,
                                   onPressed:
                                       _isFavorite ? null : _toggleFavorite,
                                 ),
@@ -265,28 +262,21 @@ class _StoryActionButton extends StatelessWidget {
     required this.label,
     required this.emoji,
     required this.onPressed,
-    this.isActive = false,
   });
 
   final String label;
   final String emoji;
   final VoidCallback? onPressed;
-  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor:
-            isActive ? AppColors.lavenderDark : AppColors.textPrimary,
-        backgroundColor: isActive
-            ? AppColors.lavenderLight.withValues(alpha: 0.35)
-            : AppColors.creamSurface,
+        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.creamSurface,
         side: BorderSide(
-          color: isActive
-              ? AppColors.lavenderDark
-              : AppColors.lavenderLight.withValues(alpha: 0.7),
+          color: AppColors.lavenderLight.withValues(alpha: 0.7),
         ),
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(

@@ -1,26 +1,28 @@
 # CozyVerse
 
-Current Features
+## Completed
 
 - Onboarding
 - Home Dashboard
 - Mood Tracking
-- Mood Recommendations
+- Mood-Based Recommendations
 - Library
-- Add/Edit Story
-- Story Details
-- Favorites
+- Add Story
+- Edit Story
+- Story Detail Screen
+- Favorites System
 - Saved Stories
-- Local Storage
+- Local Persistence
 
-Theme
+## Design
 
-- Pastel lavender
+- Pastel lavender palette
 - Cream backgrounds
 - Whimsical cozy aesthetic
+- Material 3
 
-Next Planned Features
+## Planned
 
-- Profile
-- Achievements
-- Custom Illustrations
+- Profile Screen
+- Achievements System
+- Custom Illustration Pack

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'library/library_screen.dart';
 import 'mood/mood_screen.dart';
+import 'profile/profile_screen.dart';
 import 'saved/saved_screen.dart';
 
 class AppShell extends StatefulWidget {
@@ -43,20 +44,36 @@ class _AppShellState extends State<AppShell> {
     ),
   ];
 
-  static const _tabs = [
-    HomeScreen(),
-    MoodScreen(),
-    LibraryScreen(),
-    SavedScreen(),
-    _PlaceholderTab(label: 'Profile'),
-  ];
+  static const _profileTabIndex = 4;
+
+  Widget _buildTab(int index, Widget child) {
+    final isSelected = _selectedIndex == index;
+
+    return IgnorePointer(
+      ignoring: !isSelected,
+      child: AnimatedOpacity(
+        opacity: isSelected ? 1 : 0,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOut,
+        child: child,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _tabs,
+      body: Stack(
+        children: [
+          _buildTab(0, const HomeScreen()),
+          _buildTab(1, const MoodScreen()),
+          _buildTab(2, const LibraryScreen()),
+          _buildTab(3, const SavedScreen()),
+          _buildTab(
+            4,
+            ProfileScreen(isActive: _selectedIndex == _profileTabIndex),
+          ),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
@@ -64,22 +81,6 @@ class _AppShellState extends State<AppShell> {
           setState(() => _selectedIndex = index);
         },
         destinations: _destinations,
-      ),
-    );
-  }
-}
-
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.headlineMedium,
       ),
     );
   }

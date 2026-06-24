@@ -6,6 +6,8 @@ import '../../models/mood.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
 
+import '../../widgets/mood_option_card.dart';
+
 class MoodScreen extends StatelessWidget {
   const MoodScreen({super.key});
 
@@ -29,6 +31,7 @@ class MoodScreen extends StatelessWidget {
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           const _MoodHeader(),
+        
                           const SizedBox(height: 24),
                           _MoodGrid(
                             moods: MoodData.moods,
@@ -36,7 +39,27 @@ class MoodScreen extends StatelessWidget {
                             onMoodSelected: MoodStorage.instance.selectMood,
                           ),
                           const SizedBox(height: 20),
-                          _SelectedMoodPreview(mood: selectedMood),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 320),
+                            switchInCurve: Curves.easeInOut,
+                            switchOutCurve: Curves.easeInOut,
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0, 0.03),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _SelectedMoodPreview(
+                              key: ValueKey(selectedMood.id),
+                              mood: selectedMood,
+                            ),
+                          ),
                         ]),
                       ),
                     ),
@@ -130,7 +153,7 @@ class _MoodGrid extends StatelessWidget {
           itemCount: moods.length,
           itemBuilder: (context, index) {
             final mood = moods[index];
-            return _MoodOptionCard(
+            return MoodOptionCard(
               mood: mood,
               isSelected: mood.id == selectedMoodId,
               onTap: () => onMoodSelected(mood),
@@ -142,80 +165,8 @@ class _MoodGrid extends StatelessWidget {
   }
 }
 
-class _MoodOptionCard extends StatelessWidget {
-  const _MoodOptionCard({
-    required this.mood,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Mood mood;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = MoodData.accentFor(mood);
-
-    return AnimatedScale(
-      scale: isSelected ? 1.04 : 1,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            decoration: BoxDecoration(
-              color: accent,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected
-                    ? AppColors.lavenderDark
-                    : AppColors.lavenderLight.withValues(alpha: 0.55),
-                width: isSelected ? 2.5 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isSelected
-                      ? AppColors.lavender.withValues(alpha: 0.28)
-                      : AppColors.lavender.withValues(alpha: 0.1),
-                  blurRadius: isSelected ? 16 : 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  mood.emoji,
-                  style: const TextStyle(fontSize: 32),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  mood.name,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SelectedMoodPreview extends StatelessWidget {
-  const _SelectedMoodPreview({required this.mood});
+  const _SelectedMoodPreview({super.key, required this.mood});
 
   final Mood mood;
 
