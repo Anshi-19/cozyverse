@@ -7,7 +7,7 @@ import '../../data/recommendation_data.dart';
 import '../../models/recommendation.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
-import '../../widgets/illustrations/hero_illustration.dart';
+import '../../widgets/home_carousel.dart';
 import '../../widgets/monthly_progress_card.dart';
 import '../../widgets/mood_card.dart';
 import '../../widgets/recommendation_card.dart';
@@ -69,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                         delegate: SliverChildListDelegate([
                           const _GreetingHeader(),
                           const SizedBox(height: 20),
-                          const HeroIllustration(),
+                          const HomeCarousel(),
                           const SizedBox(height: 24),
                           MoodCard(
                             moodLabel: mood.displayLabel,
