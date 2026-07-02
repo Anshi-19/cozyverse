@@ -63,7 +63,7 @@ class MoodOptionCard extends StatelessWidget {
         child: Image.asset(
           'assets/illustrations/mood_${mood.id}.png',
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) {
+          errorBuilder: (context, error, stackTrace) {
             return Text(
               mood.emoji,
               style: const TextStyle(fontSize: 32),
