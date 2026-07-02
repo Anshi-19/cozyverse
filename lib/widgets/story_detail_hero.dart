@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../data/recommendation_data.dart';
 import '../models/recommendation.dart';
 import '../theme/app_theme.dart';
 import 'category_badge.dart';
+import 'recommendations/recommendation_story_cover.dart';
 
 class StoryDetailHero extends StatelessWidget {
   const StoryDetailHero({
@@ -15,80 +15,58 @@ class StoryDetailHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradientColors =
-        RecommendationData.gradientForCategory(recommendation.category);
-    final height = MediaQuery.sizeOf(context).height * 0.34;
+    final height = MediaQuery.sizeOf(context).height * 0.44;
 
     return SizedBox(
-      height: height.clamp(240.0, 320.0),
+      height: height.clamp(280.0, 380.0),
       width: double.infinity,
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          Container(
+          RecommendationStoryCover(
+            recommendation: recommendation,
+            borderRadius: BorderRadius.zero,
+          ),
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
                 colors: [
-                  gradientColors.first,
-                  gradientColors.last,
-                  AppColors.cream,
+                  AppColors.textPrimary.withValues(alpha: 0.08),
+                  Colors.transparent,
+                  AppColors.cream.withValues(alpha: 0.05),
+                  AppColors.cream.withValues(alpha: 0.92),
                 ],
-                stops: const [0.0, 0.55, 1.0],
+                stops: const [0.0, 0.35, 0.72, 1.0],
               ),
             ),
           ),
           Positioned(
-            top: 24,
-            right: 28,
+            top: 56,
+            right: 24,
             child: Icon(
-              Icons.auto_awesome,
-              size: 18,
-              color: AppColors.lavenderDark.withValues(alpha: 0.35),
+              Icons.auto_awesome_rounded,
+              size: 20,
+              color: Colors.white.withValues(alpha: 0.55),
             ),
           ),
           Positioned(
-            top: 48,
-            left: 32,
+            top: 88,
+            left: 28,
             child: Icon(
               Icons.star_rounded,
               size: 14,
-              color: AppColors.lavenderDark.withValues(alpha: 0.3),
+              color: Colors.white.withValues(alpha: 0.45),
             ),
           ),
           Positioned(
-            bottom: 28,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Container(
-                  width: 112,
-                  height: 112,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.creamSurface.withValues(alpha: 0.75),
-                    border: Border.all(
-                      color: AppColors.lavenderLight.withValues(alpha: 0.7),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.lavenderDark.withValues(alpha: 0.18),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    recommendation.icon,
-                    size: 52,
-                    color: AppColors.lavenderDark,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CategoryBadge(label: recommendation.category),
-              ],
+            left: 24,
+            right: 24,
+            bottom: 36,
+            child: CategoryBadge(
+              label: recommendation.category,
+              backgroundColor: AppColors.creamSurface.withValues(alpha: 0.92),
             ),
           ),
         ],

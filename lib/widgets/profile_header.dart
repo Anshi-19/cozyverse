@@ -6,18 +6,20 @@ class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
     super.key,
     this.name = 'Anshi',
-    this.subtitle = 'Building a universe of stories ✨',
+    this.subtitle = 'Story Explorer ✨',
+    this.description = 'Building a universe of stories.',
   });
 
   final String name;
   final String subtitle;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         _ProfileAvatar(name: name),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Text(
           name,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -26,13 +28,23 @@ class ProfileHeader extends StatelessWidget {
                 letterSpacing: -0.3,
               ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AppColors.lavenderDark,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          description,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textSecondary,
-                height: 1.4,
+                height: 1.45,
+                fontStyle: FontStyle.italic,
               ),
         ),
       ],
@@ -50,8 +62,8 @@ class _ProfileAvatar extends StatelessWidget {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return Container(
-      width: 96,
-      height: 96,
+      width: 112,
+      height: 112,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
@@ -79,8 +91,8 @@ class _ProfileAvatar extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Positioned(
-            top: 14,
-            right: 18,
+            top: 16,
+            right: 20,
             child: Icon(
               Icons.star_rounded,
               size: 14,
@@ -88,8 +100,8 @@ class _ProfileAvatar extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 16,
-            left: 16,
+            bottom: 18,
+            left: 18,
             child: Icon(
               Icons.auto_awesome,
               size: 12,
@@ -101,6 +113,7 @@ class _ProfileAvatar extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: AppColors.lavenderDark,
+                  fontSize: 40,
                 ),
           ),
         ],

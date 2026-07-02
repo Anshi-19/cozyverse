@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../../data/favorites_storage.dart';
 import '../../data/mood_data.dart';
+import '../../data/personal_rating_storage.dart';
 import '../../data/recommendation_data.dart';
+import '../../data/recommendation_presentation.dart';
 import '../../models/recommendation.dart';
+import '../../navigation/cozy_page_route.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/decorative_stars.dart';
-import '../../widgets/favorite_action_button.dart';
+import '../journal/story_journal_screen.dart';
+import '../../widgets/story_detail/story_detail_action_bar.dart';
+import '../../widgets/story_detail/story_detail_community_rating.dart';
+import '../../widgets/story_detail/story_detail_genres_row.dart';
+import '../../widgets/story_detail/story_detail_mood_section.dart';
+import '../../widgets/story_detail/story_detail_personal_rating.dart';
+import '../../widgets/story_detail/story_detail_quote_card.dart';
+import '../../widgets/story_detail/story_detail_section.dart';
 import '../../widgets/story_detail_hero.dart';
 import '../../widgets/story_details_card.dart';
 
@@ -71,100 +81,38 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
     final mood = MoodData.findById(recommendation.moodId);
     final moodLabel = mood?.displayLabel ?? recommendation.moodId;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final rating = RecommendationPresentation.ratingFor(recommendation);
 
     return Scaffold(
       body: Stack(
         children: [
           const _StoryDetailBackground(),
           const DecorativeStars(),
-          Column(
-            children: [
-              StoryDetailHero(recommendation: recommendation),
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + bottomPadding),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          Text(
-                            recommendation.title,
-                            style:
-                                Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.textPrimary,
-                                      letterSpacing: -0.3,
-                                    ),
+          CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: StoryDetailHero(recommendation: recommendation),
+              ),
+              SliverToBoxAdapter(
+                child: Transform.translate(
+                  offset: const Offset(0, -28),
+                  child: _StoryDetailPage(
+                    recommendation: recommendation,
+                    moodLabel: moodLabel,
+                    rating: rating,
+                    isFavorite: _isFavorite,
+                    onFavoritePressed: _isFavorite ? null : _toggleFavorite,
+                    onStartStory: () {
+                      Navigator.of(context).push(
+                        cozyPageRoute(
+                          StoryJournalScreen(
+                            recommendation: recommendation,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            recommendation.description,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.5,
-                                ),
-                          ),
-                          const SizedBox(height: 24),
-                          _MoodMatchSection(
-                            moodLabel: moodLabel,
-                            blurb: RecommendationData.moodMatchBlurbFor(
-                              recommendation.moodId,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          StoryDetailsCard(
-                            category: recommendation.category,
-                            recommendedMood: moodLabel,
-                            estimatedTime: RecommendationData.estimatedTimeFor(
-                              recommendation,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FavoriteActionButton(
-                                  isFavorite: _isFavorite,
-                                  onPressed:
-                                      _isFavorite ? null : _toggleFavorite,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _StoryActionButton(
-                                  label: 'Add to Library',
-                                  emoji: '📚',
-                                  onPressed: () {},
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: FilledButton(
-                              onPressed: () {},
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.lavenderDark,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: const Text(
-                                'Start This Story',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ]),
-                      ),
-                    ),
-                  ],
+                        ),
+                      );
+                    },
+                    bottomPadding: bottomPadding,
+                  ),
                 ),
               ),
             ],
@@ -188,102 +136,149 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
   }
 }
 
-class _MoodMatchSection extends StatelessWidget {
-  const _MoodMatchSection({
+class _StoryDetailPage extends StatefulWidget {
+  const _StoryDetailPage({
+    required this.recommendation,
     required this.moodLabel,
-    required this.blurb,
+    required this.rating,
+    required this.isFavorite,
+    required this.onFavoritePressed,
+    required this.onStartStory,
+    required this.bottomPadding,
   });
 
+  final Recommendation recommendation;
   final String moodLabel;
-  final String blurb;
+  final double rating;
+  final bool isFavorite;
+  final VoidCallback? onFavoritePressed;
+  final VoidCallback onStartStory;
+  final double bottomPadding;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFF3E8),
-            Color(0xFFF5EEFB),
-            Color(0xFFEDE4F7),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.lavenderLight.withValues(alpha: 0.55),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.lavenderLight.withValues(alpha: 0.16),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Mood Match',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
-                ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            moodLabel,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            blurb,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  height: 1.45,
-                  color: AppColors.textSecondary,
-                  fontStyle: FontStyle.italic,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+  State<_StoryDetailPage> createState() => _StoryDetailPageState();
 }
 
-class _StoryActionButton extends StatelessWidget {
-  const _StoryActionButton({
-    required this.label,
-    required this.emoji,
-    required this.onPressed,
-  });
+class _StoryDetailPageState extends State<_StoryDetailPage> {
+  late int _personalRating;
 
-  final String label;
-  final String emoji;
-  final VoidCallback? onPressed;
+  static const _horizontalPadding = 24.0;
+  static const _sectionGap = 28.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _personalRating =
+        PersonalRatingStorage.instance.ratingFor(widget.recommendation);
+  }
+
+  void _updatePersonalRating(int rating) {
+    setState(() => _personalRating = rating);
+    PersonalRatingStorage.instance.save(widget.recommendation, rating);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        backgroundColor: AppColors.creamSurface,
-        side: BorderSide(
-          color: AppColors.lavenderLight.withValues(alpha: 0.7),
+    final recommendation = widget.recommendation;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.cream,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.lavender.withValues(alpha: 0.14),
+            blurRadius: 24,
+            offset: const Offset(0, -8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          _horizontalPadding,
+          8,
+          _horizontalPadding,
+          28 + widget.bottomPadding,
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.lavenderLight.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              recommendation.title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.4,
+                    height: 1.15,
+                  ),
+            ),
+            const SizedBox(height: 20),
+            StoryDetailCommunityRating(rating: widget.rating),
+            const SizedBox(height: 20),
+            StoryDetailPersonalRating(
+              rating: _personalRating,
+              onRatingChanged: _updatePersonalRating,
+            ),
+            const SizedBox(height: _sectionGap),
+            StoryDetailSection(
+              title: 'Genres',
+              child: StoryDetailGenresRow(recommendation: recommendation),
+            ),
+            const SizedBox(height: _sectionGap),
+            StoryDetailSection(
+              title: 'Story Information',
+              child: StoryDetailsCard(
+                category: recommendation.category,
+                recommendedMood: widget.moodLabel,
+                estimatedTime: RecommendationData.estimatedTimeFor(
+                  recommendation,
+                ),
+              ),
+            ),
+            const SizedBox(height: _sectionGap),
+            StoryDetailSection(
+              title: 'About This Story',
+              child: Text(
+                recommendation.description,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textPrimary,
+                      height: 1.6,
+                    ),
+              ),
+            ),
+            const SizedBox(height: _sectionGap),
+            StoryDetailMoodSection(
+              moodLabel: widget.moodLabel,
+              blurb: RecommendationData.moodMatchBlurbFor(
+                recommendation.moodId,
+              ),
+              matchText: RecommendationPresentation.moodMatchText(
+                recommendation,
+              ),
+            ),
+            const SizedBox(height: _sectionGap),
+            const StoryDetailQuoteCard(),
+            const SizedBox(height: 32),
+            StoryDetailActionBar(
+              isFavorite: widget.isFavorite,
+              onFavoritePressed: widget.onFavoritePressed,
+              onAddToLibrary: () {},
+              onStartStory: widget.onStartStory,
+            ),
+          ],
         ),
       ),
-      child: Text('$emoji $label'),
     );
   }
 }

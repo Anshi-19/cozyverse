@@ -15,53 +15,40 @@ class ProfileCurrentMoodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CozyCard(
-      gradient: const LinearGradient(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0xFFFFF3E8),
-          Color(0xFFF5EEFB),
-          Color(0xFFEDE4F7),
+          const Color(0xFFFFF3E8).withValues(alpha: 0.9),
+          const Color(0xFFF5EEFB).withValues(alpha: 0.85),
         ],
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            mood.emoji,
-            style: const TextStyle(fontSize: 40),
+            '${mood.emoji} ${mood.name}',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Current Mood',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
+          const SizedBox(height: 6),
+          Text(
+            "Today's Story Mood",
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  mood.displayLabel,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                      ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            mood.description,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  height: 1.4,
+                  color: AppColors.textSecondary,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  mood.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.45,
-                        color: AppColors.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

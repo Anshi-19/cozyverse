@@ -4,17 +4,30 @@ import '../../navigation/cozy_page_route.dart';
 import '../../data/mood_data.dart';
 import '../../data/mood_storage.dart';
 import '../../data/recommendation_data.dart';
+import '../../models/mood.dart';
 import '../../models/recommendation.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/cozy_card.dart';
 import '../../widgets/decorative_stars.dart';
 import '../../widgets/home_carousel.dart';
 import '../../widgets/monthly_progress_card.dart';
-import '../../widgets/mood_card.dart';
 import '../../widgets/recommendation_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stat_card.dart';
-import '../../widgets/story_mood_card.dart';
 import '../story/story_detail_screen.dart';
+
+abstract final class _HomeSpacing {
+  static const horizontal = 24.0;
+  static const top = 8.0;
+  static const bottom = 28.0;
+  static const afterGreeting = 20.0;
+  static const afterCarousel = 24.0;
+  static const afterMood = 32.0;
+  static const sectionTitleGap = 10.0;
+  static const afterSectionTitle = 16.0;
+  static const majorSection = 36.0;
+  static const minorSection = 28.0;
+}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -64,42 +77,22 @@ class HomeScreen extends StatelessWidget {
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                      padding: EdgeInsets.fromLTRB(
+                        _HomeSpacing.horizontal,
+                        _HomeSpacing.top,
+                        _HomeSpacing.horizontal,
+                        _HomeSpacing.bottom + bottomPadding,
+                      ),
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           const _GreetingHeader(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: _HomeSpacing.afterGreeting),
                           const HomeCarousel(),
-                          const SizedBox(height: 24),
-                          MoodCard(
-                            moodLabel: mood.displayLabel,
-                            icon: MoodData.iconFor(mood),
-                          ),
-                          const SizedBox(height: 20),
-                          StoryMoodCard(
-                            moodTitle: mood.displayLabel,
-                            description: mood.description,
-                          ),
-                          const SizedBox(height: 28),
-                          const SectionHeader(title: 'Your Collection'),
-                          const SizedBox(height: 14),
-                          const _StatsRow(stats: _stats),
-                          const SizedBox(height: 28),
-                          const SectionHeader(title: 'Recommended For Tonight'),
-                          const SizedBox(height: 8),
-                          Text(
-                            RecommendationData.headingFor(mood.id),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.4,
-                                ),
-                          ),
-                          const SizedBox(height: 14),
-                          _RecommendationsRow(
-                            recommendations:
-                                RecommendationData.forMood(mood.id),
-                            moodId: mood.id,
+                          const SizedBox(height: _HomeSpacing.afterCarousel),
+                          _HomeMoodCard(mood: mood),
+                          const SizedBox(height: _HomeSpacing.afterMood),
+                          _HomeRecommendationsSection(
+                            mood: mood,
                             onRecommendationTap: (recommendation) {
                               Navigator.of(context).push(
                                 cozyPageRoute<void>(
@@ -110,14 +103,20 @@ class HomeScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: _HomeSpacing.majorSection),
+                          const SectionHeader(title: 'Your Collection'),
+                          const SizedBox(height: _HomeSpacing.sectionTitleGap),
+                          const _StatsRow(stats: _stats),
+                          const SizedBox(height: _HomeSpacing.minorSection),
                           const SectionHeader(title: 'Monthly Progress'),
-                          const SizedBox(height: 14),
-                          const MonthlyProgressCard(
-                            completedCount: 8,
-                            progress: 0.67,
+                          const SizedBox(height: _HomeSpacing.sectionTitleGap),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4),
+                            child: MonthlyProgressCard(
+                              completedCount: 8,
+                              progress: 0.67,
+                            ),
                           ),
-                          SizedBox(height: 24 + bottomPadding),
                         ]),
                       ),
                     ),
@@ -141,20 +140,247 @@ class _GreetingHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+          'YOUR STORY AWAITS',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.lavenderDark.withValues(alpha: 0.75),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.8,
+                fontSize: 11,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Text(
           'Good Evening, Anshi ✨',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.6,
+                height: 1.1,
+              ),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          width: 36,
+          height: 3,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.lavenderDark.withValues(alpha: 0.55),
+                AppColors.lavenderLight.withValues(alpha: 0.25),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'What story are you living today?',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+                fontStyle: FontStyle.italic,
+                height: 1.45,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeMoodCard extends StatelessWidget {
+  const _HomeMoodCard({required this.mood});
+
+  final Mood mood;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = MoodData.accentFor(mood);
+
+    return CozyCard(
+      padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          accent,
+          AppColors.creamSurface.withValues(alpha: 0.92),
+          const Color(0xFFF5EEFB),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.6),
+              border: Border.all(
+                color: AppColors.lavenderLight.withValues(alpha: 0.65),
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              mood.emoji,
+              style: const TextStyle(fontSize: 26),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  mood.displayLabel,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        height: 1.2,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  mood.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        height: 1.4,
+                        color: AppColors.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => _HomeMoodPickerSheet.show(context),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.lavenderDark,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Change',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeMoodPickerSheet extends StatelessWidget {
+  const _HomeMoodPickerSheet();
+
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.creamSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => const _HomeMoodPickerSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24, 12, 24, 20 + bottomPadding),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.lavenderLight.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Choose Your Mood',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+          ),
+          const SizedBox(height: 16),
+          ...MoodData.moods.map((mood) {
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Text(mood.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(
+                mood.name,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              onTap: () {
+                MoodStorage.instance.selectMood(mood);
+                Navigator.of(context).pop();
+              },
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeRecommendationsSection extends StatelessWidget {
+  const _HomeRecommendationsSection({
+    required this.mood,
+    required this.onRecommendationTap,
+  });
+
+  final Mood mood;
+  final ValueChanged<Recommendation> onRecommendationTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final recommendations = RecommendationData.forMood(mood.id);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '✨ Picked For Your Mood',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
                 letterSpacing: -0.3,
+                height: 1.15,
               ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: _HomeSpacing.sectionTitleGap),
         Text(
-          'What story are you living today?',
+          'Stories chosen to match your current mood.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: AppColors.textSecondary,
-                height: 1.4,
+                fontWeight: FontWeight.w500,
+                height: 1.45,
               ),
+        ),
+        const SizedBox(height: _HomeSpacing.afterSectionTitle),
+        _RecommendationsRow(
+          recommendations: recommendations,
+          moodId: mood.id,
+          onRecommendationTap: onRecommendationTap,
         ),
       ],
     );
@@ -178,7 +404,7 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final spacing = 12.0;
+        const spacing = 12.0;
         final cardWidth = (constraints.maxWidth - spacing * 2) / 3;
 
         return Row(
@@ -218,18 +444,23 @@ class _RecommendationsRow extends StatelessWidget {
   final String moodId;
   final ValueChanged<Recommendation> onRecommendationTap;
 
+  static const _cardWidth = 220.0;
+  static const _rowHeight = 400.0;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 214,
+      height: _rowHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
         itemCount: recommendations.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 14),
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           return RecommendationCard(
             recommendation: recommendations[index],
             moodId: moodId,
+            width: _cardWidth,
             onTap: () => onRecommendationTap(recommendations[index]),
           );
         },

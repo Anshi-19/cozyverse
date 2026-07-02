@@ -6,22 +6,26 @@ class LibrarySearchField extends StatelessWidget {
   const LibrarySearchField({
     super.key,
     required this.controller,
-    required this.onChanged,
+    this.onChanged,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      enabled: enabled,
+      readOnly: onChanged == null,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: AppColors.textPrimary,
           ),
       decoration: InputDecoration(
-        hintText: 'Search by title…',
+        hintText: 'Search your story journey...',
         hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -45,7 +49,7 @@ class LibrarySearchField extends StatelessWidget {
               ),
               onPressed: () {
                 controller.clear();
-                onChanged('');
+                onChanged?.call('');
               },
             );
           },

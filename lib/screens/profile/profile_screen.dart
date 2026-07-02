@@ -8,10 +8,11 @@ import '../../data/profile_stats.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/achievement_card.dart';
 import '../../widgets/decorative_stars.dart';
-import '../../widgets/illustrations/profile_header_illustration.dart';
 import '../../widgets/profile_current_mood_card.dart';
 import '../../widgets/profile_header.dart';
 import '../../widgets/profile_stat_card.dart';
+import '../../widgets/profile_story_memories_card.dart';
+import '../../widgets/profile_story_personality_card.dart';
 import '../../widgets/reading_journey_card.dart';
 import '../../widgets/section_header.dart';
 
@@ -59,8 +60,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: EdgeInsets.fromLTRB(24, 16, 24, 24 + bottomPadding),
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
-                          const ProfileHeaderIllustration(),
-                          const SizedBox(height: 20),
                           const ProfileHeader(),
                           const SizedBox(height: 28),
                           const SectionHeader(title: 'Your Stats'),
@@ -75,9 +74,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             totalSeries: stats.totalSeries,
                           ),
                           const SizedBox(height: 28),
+                          const SectionHeader(title: 'Story Personality'),
+                          const SizedBox(height: 14),
+                          const ProfileStoryPersonalityCard(),
+                          const SizedBox(height: 28),
                           const SectionHeader(title: 'Achievements'),
                           const SizedBox(height: 14),
                           _AchievementsGrid(achievements: stats.achievements),
+                          const SizedBox(height: 28),
+                          SectionHeader(
+                            title: 'Story Memories',
+                            trailing: TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.lavenderDark,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'See All →',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          const ProfileStoryMemoriesCard(),
                           const SizedBox(height: 28),
                           const SectionHeader(title: 'Current Mood'),
                           const SizedBox(height: 14),
@@ -105,7 +133,7 @@ class _StatsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final cards = [
       (
-        label: 'Stories Added',
+        label: 'Stories in Library',
         value: '${stats.storiesAdded}',
         emoji: '📚',
         gradientColors: [const Color(0xFFE8DFF5), const Color(0xFFD4C5E8)],
